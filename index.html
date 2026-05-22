@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Mundos</title>
+    <!-- Importando o Tailwind CSS para deixar o visual bonito sem criar arquivos .css adicionais -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 min-h-screen font-sans flex flex-col justify-between text-slate-300">
+
+    <div>
+        <header class="bg-[#1e1b4b] text-slate-100 py-6 shadow-md text-center border-b border-indigo-900">
+            <h1 class="text-3xl font-bold tracking-wide">🌌 Gerador de Mundos</h1>
+            <p class="text-sm text-indigo-300 mt-1">Insira suas ideias e deixe a Força Criativa moldar a realidade!</p>
+        </header>
+
+        <main class="max-w-3xl mx-auto p-4 mt-6">
+            <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-lg">
+                <h2 class="text-lg font-semibold text-slate-200 mb-4">Suas Ideias e Conceitos (Mínimo 3)</h2>
+
+                <form id="world-form" onsubmit="gerarMundo(event)">
+                    <div id="inputs-container" class="space-y-3">
+                        <input type="text" required class="pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100" placeholder="Sociedade...">
+                        <input type="text" required class="pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100" placeholder="Leis do Mundo...">
+                        <input type="text" required class="pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100" placeholder="Mitologia...">
+                    </div>
+
+                    <button type="button" onclick="adicionarInput()" class="mt-3 text-sm font-medium flex items-center justify-center gap-1 w-full sm:w-auto py-2 px-4 rounded-md bg-slate-800 text-sky-400 border border-slate-700 hover:bg-slate-700 transition duration-200">
+                        ➕ Adicionar outro conceito
+                    </button>
+
+                    <div class="mt-6 flex gap-4">
+                        <button type="submit" id="btn-enviar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-md transition duration-200 flex justify-center items-center gap-2 flex-1">
+                            <span>Forjar Universo</span>
+                            <div id="loading-spinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </button>
+
+                        <button type="button" onclick="reiniciarFormulario()" class="font-semibold py-3 px-6 rounded-md transition duration-200 bg-slate-800 text-sky-400 border border-slate-700 hover:bg-slate-700">
+                            Reiniciar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="error-message" class="hidden mt-4 p-4 bg-red-950 border border-red-800 text-red-300 rounded-md text-sm"></div>
+
+            <div id="resultado-container" class="hidden mt-6 bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-xl border-t-4 border-indigo-500 mb-12 space-y-6">
+                <div>
+                    <h2 id="world-nome" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400 mb-2"></h2>
+                    <p id="world-sinopse" class="text-slate-400 italic leading-relaxed text-lg border-l-2 border-indigo-500 pl-4 bg-slate-900/50 py-2 rounded-r-md"></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-md font-bold text-sky-400 border-b border-slate-800 pb-1 mb-2">⚖️ Leis do Mundo</h3>
+                        <ul id="world-leis" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                    </div>
+                    <div>
+                        <h3 class="text-md font-bold text-sky-400 border-b border-slate-800 pb-1 mb-2">🔮 Sistema de Energia</h3>
+                        <div class="bg-slate-900/60 p-3 rounded-md text-sm space-y-1">
+                            <p><strong>Fonte:</strong> <span id="world-energia-fonte"></span></p>
+                            <p><strong>Limitação/Custo:</strong> <span id="world-energia-custo"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-md font-bold text-emerald-400 border-b border-slate-800 pb-1 mb-2">🌿 Flora Dominante</h3>
+                        <ul id="world-flora" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                    </div>
+                    <div>
+                        <h3 class="text-md font-bold text-emerald-400 border-b border-slate-800 pb-1 mb-2">🐾 Fauna Nativa</h3>
+                        <ul id="world-fauna" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-md font-bold text-amber-400 border-b border-slate-800 pb-1 mb-2">🌪️ Fenômenos Naturais</h3>
+                        <ul id="world-fenomenos" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                    </div>
+                    <div>
+                        <h3 class="text-md font-bold text-amber-400 border-b border-slate-800 pb-1 mb-2">💎 Recursos Únicos</h3>
+                        <ul id="world-recursos" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-md font-bold text-purple-400 border-b border-slate-800 pb-1 mb-2">🚀 Infraestrutura e Transporte</h3>
+                    <ul id="world-infra" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                </div>
+
+                <div>
+                    <h3 class="text-md font-bold text-purple-400 border-b border-slate-800 pb-1 mb-2">🏛️ Mitologia e Panteão</h3>
+                    <ul id="world-mitologia" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4">
+                    <h3 class="text-xl font-bold text-indigo-400 mb-4 flex items-center gap-2">👥 Estrutura Social Global</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-400 mb-2">Civilizações e Povos:</h4>
+                            <div id="world-povos" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <h4 class="text-sm font-semibold text-red-400 mb-1">🛑 Tabus Culturais:</h4>
+                                <ul id="world-tabus" class="list-disc pl-5 space-y-1 text-xs text-slate-300"></ul>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-orange-400 mb-1">⚔️ Tensões e Conflitos:</h4>
+                                <ul id="world-conflitos" class="list-disc pl-5 space-y-1 text-xs text-slate-300"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-[#0f111a] text-slate-500 py-6 shadow-inner text-center text-sm border-t border-slate-900">
+        <div class="max-w-2xl mx-auto px-4 space-y-1.5">
+            <p class="font-semibold text-slate-400">© Worldbuilder Automático - Google Gemini & Vercel</p>
+            <p class="text-xs opacity-70 leading-relaxed">
+                ⚠️ O Gemini opera sob regras de alta criatividade e complexidade. Valide a coerência dos cosmos criados.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = "https://back-worldbuilding.vercel.app/generate";
+
+        const containerInputs = document.getElementById('inputs-container');
+        const spinner = document.getElementById('loading-spinner');
+        const btnEnviar = document.getElementById('btn-enviar');
+        const resultadoContainer = document.getElementById('resultado-container');
+        const errorContainer = document.getElementById('error-message');
+
+        const SUGESTOES_TOPICOS = [
+            "Ex: Sociedade...",
+            "Ex: Leis do Mundo...",
+            "Ex: Mitologia...",
+            "Ex: Fauna e Animais...",
+            "Ex: Flora e Vegetação...",
+            "Ex: Fenômenos Naturais...",
+            "Ex: Sistema de Energia...",
+            "Ex: Infraestrutura e Transporte...",
+            "Ex: Recursos Únicos...",
+            "Ex: Tabus Culturais...",
+            "Ex: Conflitos e Tensões..."
+        ];
+
+        function gerarPlaceholder(index) {
+            return SUGESTOES_TOPICOS[index] || `Ex: Conceito ${index + 1}...`;
+        }
+
+        function atualizarPlaceholders() {
+            const inputs = containerInputs.querySelectorAll('.pedido-input');
+            inputs.forEach((input, index) => {
+                input.placeholder = gerarPlaceholder(index);
+            });
+        }
+
+        function adicionarInput() {
+            const totalInputs = containerInputs.querySelectorAll('.pedido-input').length;
+            
+            if (totalInputs >= 11) {
+                alert('Limite de 11 conceitos atingido!');
+                return;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex gap-2 items-center';
+
+            const novoInput = document.createElement('input');
+            novoInput.type = 'text';
+            novoInput.required = true;
+            novoInput.placeholder = gerarPlaceholder(totalInputs);
+            novoInput.className = 'pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100';
+
+            const btnDeletar = document.createElement('button');
+            btnDeletar.type = 'button';
+            btnDeletar.innerText = '✕';
+            btnDeletar.className = 'font-bold p-2.5 rounded-md bg-slate-800 text-sky-400 border border-slate-700 hover:bg-slate-700 transition duration-150 px-4 h-full';
+            btnDeletar.onclick = function () {
+                wrapper.remove();
+                atualizarPlaceholders();
+            };
+
+            wrapper.appendChild(novoInput);
+            wrapper.appendChild(btnDeletar);
+            containerInputs.appendChild(wrapper);
+        }
+
+        function limparElemento(elemento) {
+            elemento.innerHTML = "";
+        }
+
+        function preencherListaSimples(idElemento, dadosArray) {
+            const ul = document.getElementById(idElemento);
+            limparElemento(ul);
+            if (Array.isArray(dadosArray) && dadosArray.length > 0) {
+                dadosArray.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Nenhum item gerado para esta seção.';
+                ul.appendChild(li);
+            }
+        }
+
+        async function gerarMundo(event) {
+            event.preventDefault();
+
+            errorContainer.classList.add('hidden');
+            resultadoContainer.classList.add('hidden');
+
+            const inputs = Array.from(document.querySelectorAll('.pedido-input'));
+            const pedidos = inputs
+                .map(input => input.value.trim())
+                .filter(valor => valor !== '');
+
+            if (pedidos.length < 3) {
+                errorContainer.innerText = 'Por favor, preencha pelo menos 3 conceitos antes de enviar.';
+                errorContainer.classList.remove('hidden');
+                return;
+            }
+
+            spinner.classList.remove('hidden');
+            btnEnviar.disabled = true;
+            btnEnviar.classList.add('opacity-70');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pedidos })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.status === 'error') {
+                    throw new Error(data.message || 'Erro ao gerar o universo.');
+                }
+
+                const mundo = data.dados_historia || {};
+
+                document.getElementById('world-nome').textContent = mundo.nome_do_mundo || 'Mundo Gerado';
+                document.getElementById('world-sinopse').textContent = mundo.sinopse || 'Sem sinopse disponível.';
+                document.getElementById('world-energia-fonte').textContent = mundo.sistema_de_energia?.fonte || 'Não informado';
+                document.getElementById('world-energia-custo').textContent = mundo.sistema_de_energia?.custo_ou_limitacao || 'Não informado';
+
+                preencherListaSimples('world-leis', mundo.leis_do_mundo);
+                preencherListaSimples('world-flora', mundo.flora);
+                preencherListaSimples('world-fauna', mundo.fauna);
+                preencherListaSimples('world-fenomenos', mundo.fenomenos_naturais);
+                preencherListaSimples('world-recursos', mundo.recursos_unicos);
+                preencherListaSimples('world-infra', mundo.infraestrutura_e_transporte);
+                preencherListaSimples('world-mitologia', mundo.panteao_ou_mitologia);
+                preencherListaSimples('world-tabus', mundo.sociedade?.tabus);
+                preencherListaSimples('world-conflitos', mundo.sociedade?.conflitos);
+
+                const povosDiv = document.getElementById('world-povos');
+                limparElemento(povosDiv);
+                const povos = mundo.sociedade?.povos;
+                if (Array.isArray(povos) && povos.length > 0) {
+                    povos.forEach(povo => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-slate-950/95 p-4 rounded-xl border border-slate-700';
+                        card.innerHTML = `
+                            <p class="font-semibold text-slate-100 mb-1">${povo.nome_da_raca || 'Raça não nomeada'}</p>
+                            <p class="text-slate-300 text-sm"><strong class="text-slate-400">Aparência:</strong> ${povo.descricao_fisica || 'Descrição não fornecida.'}</p>
+                            <p class="text-slate-300 text-sm"><strong class="text-slate-400">Tecnologia/Magia:</strong> ${povo.tecnologia_ou_magia || 'Não informado.'}</p>
+                        `;
+                        povosDiv.appendChild(card);
+                    });
+                } else {
+                    const semPovos = document.createElement('p');
+                    semPovos.className = 'text-slate-400';
+                    semPovos.textContent = 'Nenhuma raça descrita pelo universo gerado.';
+                    povosDiv.appendChild(semPovos);
+                }
+
+                resultadoContainer.classList.remove('hidden');
+                resultadoContainer.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                errorContainer.innerText = `⚠️ ${error.message}`;
+                errorContainer.classList.remove('hidden');
+            } finally {
+                spinner.classList.add('hidden');
+                btnEnviar.disabled = false;
+                btnEnviar.classList.remove('opacity-70');
+            }
+        }
+
+        function reiniciarFormulario() {
+            containerInputs.innerHTML = `
+                <input type="text" required class="pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100" placeholder="Ex: Sociedade...">
+                <input type="text" required class="pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100" placeholder="Ex: Leis do Mundo...">
+                <input type="text" required class="pedido-input w-full p-2.5 bg-slate-900 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-100" placeholder="Ex: Mitologia...">
+            `;
+            errorContainer.classList.add('hidden');
+            resultadoContainer.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
