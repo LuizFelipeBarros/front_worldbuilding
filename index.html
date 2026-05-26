@@ -17,7 +17,7 @@
 
         <main class="max-w-3xl mx-auto p-4 mt-6">
             <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-lg">
-                <h2 class="text-lg font-semibold text-slate-200 mb-4">Suas Ideias e Conceitos (Mínimo 3)</h2>
+                <h2 class="text-lg font-semibold text-slate-200 mb-4">Suas Ideias e Conceitos</h2>
 
                 <form id="world-form" onsubmit="gerarMundo(event)">
                     <div id="inputs-container" class="space-y-3">
@@ -65,14 +65,11 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="text-md font-bold text-emerald-400 border-b border-slate-800 pb-1 mb-2">🌿 Flora Dominante</h3>
-                        <ul id="world-flora" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
-                    </div>
-                    <div>
-                        <h3 class="text-md font-bold text-emerald-400 border-b border-slate-800 pb-1 mb-2">🐾 Fauna Nativa</h3>
-                        <ul id="world-fauna" class="list-disc pl-5 space-y-1 text-sm text-slate-300"></ul>
+                <div>
+                    <h3 class="text-md font-bold text-emerald-400 border-b border-slate-800 pb-1 mb-2">🌿 Fauna e Flora</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div id="world-flora-section"></div>
+                        <div id="world-fauna-section"></div>
                     </div>
                 </div>
 
@@ -144,8 +141,7 @@
             "Sociedade",
             "Leis do Mundo",
             "Mitologia",
-            "Flora e Vegetação",
-            "Fauna e Animais",
+            "Flora e Flora",
             "Fenômenos Naturais",
             "Sistema de Energia",
             "Infraestrutura e Transporte",
@@ -168,8 +164,8 @@
         function adicionarInput() {
             const totalInputs = containerInputs.querySelectorAll('.pedido-input').length;
             
-            if (totalInputs >= 11) {
-                alert('Limite de 11 conceitos atingido!');
+            if (totalInputs >= 10) {
+                alert('Você ja tem muitos conceitos!');
                 return;
             }
 
@@ -216,6 +212,123 @@
             }
         }
 
+        function preencherFloraFauna(floraArray, faunaArray) {
+            const floraSection = document.getElementById('world-flora-section');
+            const faunaSection = document.getElementById('world-fauna-section');
+            
+            limparElemento(floraSection);
+            limparElemento(faunaSection);
+            
+            // Preencher Flora
+            const floraTitle = document.createElement('h4');
+            floraTitle.className = 'text-sm font-semibold text-slate-400 mb-2';
+            floraTitle.textContent = '🌿 Flora';
+            floraSection.appendChild(floraTitle);
+            
+            const floraUl = document.createElement('ul');
+            floraUl.className = 'list-disc pl-5 space-y-1 text-sm text-slate-300';
+            if (Array.isArray(floraArray) && floraArray.length > 0) {
+                floraArray.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    floraUl.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Nenhum item gerado.';
+                floraUl.appendChild(li);
+            }
+            floraSection.appendChild(floraUl);
+            
+            // Preencher Fauna
+            const faunaTitle = document.createElement('h4');
+            faunaTitle.className = 'text-sm font-semibold text-slate-400 mb-2';
+            faunaTitle.textContent = '🐾 Fauna';
+            faunaSection.appendChild(faunaTitle);
+            
+            const faunaUl = document.createElement('ul');
+            faunaUl.className = 'list-disc pl-5 space-y-1 text-sm text-slate-300';
+            if (Array.isArray(faunaArray) && faunaArray.length > 0) {
+                faunaArray.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    faunaUl.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Nenhum item gerado.';
+                faunaUl.appendChild(li);
+            }
+            faunaSection.appendChild(faunaUl);
+        }
+
+        function obterSecoesVisiveis(topicos) {
+            const mapa = {
+                'leis': ['leis', 'lei', 'regra'],
+                'energia': ['energia', 'system'],
+                'floraFauna': ['flora', 'vegetação', 'planta', 'fauna', 'animal', 'criatura'],
+                'fenomenos': ['fenômeno', 'fenomeno', 'natural'],
+                'recursos': ['recurso', 'mineral', 'matéria'],
+                'infra': ['infraestrutura', 'transporte', 'construção'],
+                'mitologia': ['mitologia', 'panteão', 'deus', 'deidade'],
+                'sociedade': ['sociedade', 'social', 'cultural', 'tabu', 'conflito']
+            };
+
+            const secoesVisiveis = {
+                leis: false,
+                energia: false,
+                floraFauna: false,
+                fenomenos: false,
+                recursos: false,
+                infra: false,
+                mitologia: false,
+                sociedade: false
+            };
+
+            topicos.forEach(topico => {
+                Object.keys(mapa).forEach(secao => {
+                    if (mapa[secao].some(palavra => topico.includes(palavra))) {
+                        secoesVisiveis[secao] = true;
+                    }
+                });
+            });
+
+            return secoesVisiveis;
+        }
+
+        function aplicarVisibilidadeSecoes(secoes) {
+            // Encontrar todos os containers de seções no resultado
+            const gridContainers = document.querySelectorAll('#resultado-container > div:nth-child(n+2)');
+            
+            // Mapear seções para seus containers
+            const secoesMap = {
+                leis: 'Leis do Mundo',
+                energia: 'Sistema de Energia',
+                floraFauna: 'Fauna e Flora',
+                fenomenos: 'Fenômenos Naturais',
+                recursos: 'Recursos Únicos',
+                infra: 'Infraestrutura e Transporte',
+                mitologia: 'Mitologia e Panteão',
+                sociedade: 'Estrutura Social Global'
+            };
+
+            // Ocultar/mostrar cada seção baseado na visibilidade
+            gridContainers.forEach(container => {
+                let shouldShow = true;
+                
+                // Verificar qual seção este container representa
+                const text = container.textContent;
+                for (const [secao, label] of Object.entries(secoesMap)) {
+                    if (text.includes(label)) {
+                        shouldShow = secoes[secao];
+                        break;
+                    }
+                }
+                
+                container.style.display = shouldShow ? '' : 'none';
+            });
+        }
+
         async function gerarMundo(event) {
             event.preventDefault();
 
@@ -226,6 +339,10 @@
             const pedidos = inputs
                 .map(input => input.value.trim())
                 .filter(valor => valor !== '');
+            
+            const topicos = inputs
+                .filter(input => input.value.trim() !== '')
+                .map(input => input.placeholder);
 
             if (pedidos.length < 3) {
                 errorContainer.innerText = 'Por favor, preencha pelo menos 3 conceitos antes de enviar.';
@@ -241,7 +358,7 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pedidos })
+                    body: JSON.stringify({ pedidos, topicos })
                 });
 
                 const data = await response.json();
@@ -252,20 +369,26 @@
 
                 const mundo = data.dados_historia || {};
 
+                // Determinar quais seções exibir baseado nos tópicos preenchidos
+                const topicosLower = topicos.map(t => t.toLowerCase());
+                const secoes = obterSecoesVisiveis(topicosLower);
+
                 document.getElementById('world-nome').textContent = mundo.nome_do_mundo || 'Mundo Gerado';
                 document.getElementById('world-sinopse').textContent = mundo.sinopse || 'Sem sinopse disponível.';
                 document.getElementById('world-energia-fonte').textContent = mundo.sistema_de_energia?.fonte || 'Não informado';
                 document.getElementById('world-energia-custo').textContent = mundo.sistema_de_energia?.custo_ou_limitacao || 'Não informado';
 
                 preencherListaSimples('world-leis', mundo.leis_do_mundo);
-                preencherListaSimples('world-flora', mundo.flora);
-                preencherListaSimples('world-fauna', mundo.fauna);
+                preencherFloraFauna(mundo.flora, mundo.fauna);
                 preencherListaSimples('world-fenomenos', mundo.fenomenos_naturais);
                 preencherListaSimples('world-recursos', mundo.recursos_unicos);
                 preencherListaSimples('world-infra', mundo.infraestrutura_e_transporte);
                 preencherListaSimples('world-mitologia', mundo.panteao_ou_mitologia);
                 preencherListaSimples('world-tabus', mundo.sociedade?.tabus);
                 preencherListaSimples('world-conflitos', mundo.sociedade?.conflitos);
+                
+                // Aplicar visibilidade das seções
+                aplicarVisibilidadeSecoes(secoes);
 
                 const povosDiv = document.getElementById('world-povos');
                 limparElemento(povosDiv);
